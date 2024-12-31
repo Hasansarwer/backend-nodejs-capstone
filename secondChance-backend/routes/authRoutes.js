@@ -5,7 +5,7 @@ const connectToDatabase = require('../models/db');
 const router = express.Router();
 const dotenv = require('dotenv');
 const pino = require('pino');  // Import Pino logger
-const e = require('express');
+const { body, validationResult } = require('express-validator');  // Task 1: Import the body and validationResult from express-validator
 dotenv.config();
 
 const logger = pino();  // Create a Pino logger instance
@@ -87,6 +87,52 @@ router.post('/login', async (req, res) => {
          return res.status(500).send('Internal server error');
 
     }
+});
+
+// {Insert it along with other imports} Task 1: Use the `body`,`validationResult` from `express-validator` for input validation
+
+router.put('/update', async (req, res) => {
+    // Task 2: Validate the input using `validationResult` and return an appropriate message if you detect an error
+    const errors = validationResult(req);
+    if (!errors.isEmpty()) {
+        logger.error('Validation error in update request', errors.array());
+        return res.status(400).json({ errors: errors.array() });
+    }
+try {
+    // Task 3: Check if `email` is present in the header and throw an appropriate error message if it is not present
+    const email = req.header('email');
+    if (!email) {
+        logger.error('Email not found in header');
+        return res.status(400).send('Email not found in header');
+    }
+    // Task 4: Connect to MongoDB
+    const db = await connectToDatabase();
+    const collection = db.collection("users");
+
+    // Task 5: Find the user credentials in database
+    const existingUser = await collection.findOne({ email });
+
+
+    existingUser.updatedAt = new Date();
+
+    // Task 6: Update the user credentials in the database
+    const updatedUser = await collection.findOneAndUpdate(
+        { email },
+        { $set: existingUser },
+        { returnDocument: 'after' }
+    );
+    // Task 7: Create JWT authentication with `user._id` as a payload using the secret key from the .env file
+    const payload = {
+        user: {
+            id: updatedUser._id.toString(),
+        },
+    };
+    const authtoken = jwt.sign(payload, JWT_SECRET);
+    res.json({authtoken});
+} catch (e) {
+     return res.status(500).send('Internal server error');
+
+}
 });
 
 module.exports = router;
