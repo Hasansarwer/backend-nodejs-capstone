@@ -50,7 +50,7 @@ router.post('/', upload.single('file') , async(req, res,next) => {
         //Step 3: task 2 - insert code here
         const collection = db.collection("secondChanceItems");
         //Step 3: task 3 - insert code here
-        const secondChanceItem = req.body;
+        let secondChanceItem = req.body;
         //Step 3: task 4 - insert code here
         const lastItemQuery = await collection.find().sort({id: -1}).limit(1).toArray();
         const lastItem = lastItemQuery[0];
@@ -94,7 +94,7 @@ router.put('/:id', async(req, res,next) => {
         //Step 5: task 2 - insert code here
         const collection = db.collection("secondChanceItems");
         //Step 5: task 3 - insert code here
-        const secondChanceItem = await collection.findOne({id});
+        let secondChanceItem = await collection.findOne({id});
         
         if (!secondChanceItem) {
             logger.error('secondChanceItem not found');
