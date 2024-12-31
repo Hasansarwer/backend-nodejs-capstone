@@ -56,7 +56,7 @@ app.use('/api/auth', authRoutes);
 
 
 
-app.use('/images', path.join(__dirname,'public/images'));
+app.use('/images', path.join(__dirname,express.static('public/images')));
 // Global Error Handler
 app.use((err, req, res, next) => {
     console.error(err);
