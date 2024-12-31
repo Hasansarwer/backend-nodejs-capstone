@@ -1,47 +1,53 @@
 const express = require('express');
-const path = require('path');
-const fs = require('fs');
-const router = express.Router();
+const bcryptjs = require('bcryptjs');
+const jwt = require('jsonwebtoken');
 const connectToDatabase = require('../models/db');
-const logger = require('../logger');
-const { create } = require('domain');
+const router = express.Router();
+const dotenv = require('dotenv');
+const pino = require('pino');  // Import Pino logger
+dotenv.config();
 
+const logger = pino();  // Create a Pino logger instance
 
+//Create JWT secret
+const JWT_SECRET = process.env.JWT_SECRET;
 
-router.post('/register', async (req, res, next) => {
+router.post('/register', async (req, res) => {
     try {
-        const db = await connectToDatabase();
-        const collection = db.collection("users");
-        const user = req.body;
-        const existEmail = await collection.findOne({ email: user.email });
+      //Connect to `secondChance` in MongoDB through `connectToDatabase` in `db.js`.
+      const db = await connectToDatabase();
+      const collection = db.collection("users");
+      const existingEmail = await collection.findOne({ email: req.body.email });
 
-        if (existEmail) {
-            logger.error('Email already exists');
-            return res.status(400).json({ error: 'Email already exists' });
+        if (existingEmail) {
+            logger.error('Email id already exists');
+            return res.status(400).json({ error: 'Email id already exists' });
         }
 
-        const salt = bcrypt.genSaltSync(10);
-        const hash = bcrypt.hashSync(user.password, salt);
-
+        const salt = await bcryptjs.genSalt(10);
+        const hash = await bcryptjs.hash(req.body.password, salt);
+        const email=req.body.email;
         const newUser = await collection.insertOne({
-            email: user.email,
-            firstName: user.firstName,
-            lastName: user.lastName,
+            email: req.body.email,
+            firstName: req.body.firstName,
+            lastName: req.body.lastName,
             password: hash,
-            created: new Date(),
+            createdAt: new Date(),
         });
 
         const payload = {
             user: {
-                id: newUser._id,
-            }
-        }
+                id: newUser.insertedId,
+            },
+        };
 
-        const authToken = jwt.sign(payload, JWT_SECRET);
+        const authtoken = jwt.sign(payload, JWT_SECRET);
         logger.info('User registered successfully');
-        res.json({ authToken, email: user.email });
+        res.json({ authtoken,email });
     } catch (e) {
-        logger.error('oops something went wrong', e)
-        next(e);
+        logger.error(e);
+        return res.status(500).send('Internal server error');
     }
 });
+
+module.exports = router;
