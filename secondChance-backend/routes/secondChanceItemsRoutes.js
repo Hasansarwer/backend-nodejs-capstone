@@ -70,9 +70,17 @@ router.post('/', upload.single('file') , async(req, res,next) => {
 router.get('/:id', async (req, res, next) => {
     try {
         //Step 4: task 1 - insert code here
+        const db = await connectToDatabase();
         //Step 4: task 2 - insert code here
+        const collection = db.collection("secondChanceItems");
         //Step 4: task 3 - insert code here
+        const secondChanceItem = await collection.findOne({id: req.params.id});
         //Step 4: task 4 - insert code here
+        if (!secondChanceItem) {
+            res.status(404).send('Item not found');
+        } else {
+            res.json(secondChanceItem);
+        }
     } catch (e) {
         next(e);
     }
