@@ -78,9 +78,8 @@ router.get('/:id', async (req, res, next) => {
         //Step 4: task 4 - insert code here
         if (!secondChanceItem) {
             res.status(404).send('Item not found');
-        } else {
-            res.json(secondChanceItem);
         }
+        res.json(secondChanceItem);
     } catch (e) {
         next(e);
     }
@@ -89,11 +88,37 @@ router.get('/:id', async (req, res, next) => {
 // Update and existing item
 router.put('/:id', async(req, res,next) => {
     try {
+        const id = req.params.id;
         //Step 5: task 1 - insert code here
+        const db = await connectToDatabase();
         //Step 5: task 2 - insert code here
+        const collection = db.collection("secondChanceItems");
         //Step 5: task 3 - insert code here
+        const secondChanceItem = await collection.findOne({id});
+        
+        if (!secondChanceItem) {
+            logger.error('secondChanceItem not found');
+            return res.status(404).json({error: 'secondChanceItem not found'});
+        }
         //Step 5: task 4 - insert code here
+        secondChanceItem.category = req.body.category;
+        secondChanceItem.condition = req.body.condition;
+        secondChanceItem.age_days = req.body.age_days;
+        secondChanceItem.description = req.body.description;
+        secondChanceItem.age_years = Number((req.body.age_days/365).toFixed(1));
+        secondChanceItem.updatedAt - new Date();
+
+        const updatepreloveItem = await collection.updateOne(
+            {id}, 
+            {$set: secondChanceItem}, 
+            {returnDocument: 'after'}
+        );
         //Step 5: task 5 - insert code here
+        if(updatepreloveItem) {
+            res.json({"uploaded":"success"});
+        } else {
+            res.json({"uploaded":"failed"});
+        }
     } catch (e) {
         next(e);
     }
