@@ -27,6 +27,7 @@ router.get('/', async (req, res, next) => {
     logger.info('/ called');
     try {
         //Step 2: task 1 - insert code here
+        const db = await connectToDatabase();
         //Step 2: task 2 - insert code here
         //Step 2: task 3 - insert code here
         //Step 2: task 4 - insert code here
