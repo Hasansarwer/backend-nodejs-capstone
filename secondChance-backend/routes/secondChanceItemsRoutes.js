@@ -60,7 +60,7 @@ router.post('/', upload.single('file') , async(req, res,next) => {
         secondChanceItem.date_added = date_added;
         //Step 3: task 6 - insert code here
         secondChanceItem = await collection.insertOne(secondChanceItem);
-        res.status(201).json(secondChanceItem.ops[0]);
+        res.status(201).json(secondChanceItem);
     } catch (e) {
         next(e);
     }
