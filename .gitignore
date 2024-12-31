@@ -130,3 +130,10 @@ dmypy.json
 
 # Pyre type checker
 .pyre/
+
+
+secondChance-frontend/.env
+
+secondChance-backend/.env
+
+secondChance-backend/utils/impot-mongo/.env
