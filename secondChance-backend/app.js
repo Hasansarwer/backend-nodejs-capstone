@@ -21,7 +21,7 @@ connectToDatabase().then(() => {
 
 
 app.use(express.json());
-
+loadData();
 // Route files
 
 // authRoutes Step 2: import the authRoutes and store in a constant called authRoutes
